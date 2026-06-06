@@ -5,7 +5,7 @@ import boto3
 import uuid
 
 def handler(event: dict, context) -> dict:
-    """Загрузка документа в S3 из админ-панели"""
+    """Загрузка документа в S3 с публичным доступом"""
 
     if event.get('httpMethod') == 'OPTIONS':
         return {
@@ -29,11 +29,10 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 400,
             'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': 'filename и fileData обязательны'})
+            'body': json.dumps({'error': 'filename and fileData are required'})
         }
 
     file_bytes = base64.b64decode(file_data_b64)
-
     safe_name = filename.replace(' ', '_')
     unique_key = f"documents/{uuid.uuid4().hex[:8]}_{safe_name}"
 
@@ -49,7 +48,8 @@ def handler(event: dict, context) -> dict:
         Key=unique_key,
         Body=file_bytes,
         ContentType=content_type,
-        ContentDisposition=f'attachment; filename="{safe_name}"'
+        ContentDisposition=f'attachment; filename="{safe_name}"',
+        ACL='public-read'
     )
 
     cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{unique_key}"

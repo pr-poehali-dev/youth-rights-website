@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
 const UPLOAD_URL = "https://functions.poehali.dev/cd73b9f3-1057-4815-a788-0cc0a063ad28";
+const APPEAL_URL = "https://functions.poehali.dev/c81bd481-7577-47c7-afe5-55165e991fd6";
 
 type Page = "home" | "articles" | "documents" | "appeal" | "contacts" | "admin";
 
@@ -45,8 +46,8 @@ const initialArticles: Article[] = [
     title: "Молодёжное жильё: льготная ипотека и государственные программы",
     date: "18 марта 2025",
     category: "Жилищное право",
-    excerpt: "Обзор федеральных и региональных программ поддержки молодых семей и специалистов в ЯНАО при получении жилья.",
-    content: "На территории Ямало-Ненецкого автономного округа действует ряд программ поддержки молодых семей и специалистов в сфере жилья. Федеральная программа «Семейная ипотека» предоставляет льготную ставку до 6% для семей с детьми. Региональные субсидии позволяют компенсировать часть первоначального взноса молодым специалистам, работающим в приоритетных для округа отраслях.",
+    excerpt: "Обзор федеральных и региональных программ поддержки молодых семей и специалистов при получении жилья.",
+    content: "На территории Ямало-Ненецкого автономного округа действует ряд программ поддержки молодых семей и специалистов в сфере жилья. Федеральная программа «Семейная ипотека» предоставляет льготную ставку до 6% для семей с детьми. Региональные субсидии позволяют компенсировать часть первоначального взноса молодым специалистам, работающим в приоритетных для региона отраслях.",
   },
 ];
 
@@ -77,6 +78,8 @@ export default function Index() {
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [adminTab, setAdminTab] = useState<"articles" | "documents">("articles");
   const [appealSent, setAppealSent] = useState(false);
+  const [appealSending, setAppealSending] = useState(false);
+  const [appealError, setAppealError] = useState("");
   const [appealForm, setAppealForm] = useState({ lastName: "", firstName: "", middleName: "", birthDate: "", phone: "", email: "", message: "", consent: false });
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
@@ -121,6 +124,25 @@ export default function Index() {
       reader.onerror = () => reject(new Error("Ошибка чтения файла"));
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleAppealSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAppealSending(true);
+    setAppealError("");
+    try {
+      const res = await fetch(APPEAL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(appealForm),
+      });
+      if (!res.ok) throw new Error("Ошибка отправки");
+      setAppealSent(true);
+    } catch {
+      setAppealError("Не удалось отправить обращение. Попробуйте позже или напишите напрямую на почту.");
+    } finally {
+      setAppealSending(false);
+    }
   };
 
   const handleFileUpload = async (file: File, target: "new" | "edit") => {
@@ -208,11 +230,7 @@ export default function Index() {
               </div>
               <div className="max-w-6xl mx-auto px-6 py-24 w-full relative">
                 <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full mb-6 opacity-0 animate-fade-up delay-100">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <span className="font-body text-xs text-primary tracking-wider">Уполномоченный по правам молодёжи</span>
-                  </div>
-                  <h1 className="font-display text-6xl md:text-8xl font-semibold leading-none mb-6 opacity-0 animate-fade-up delay-200 text-foreground">
+                  <h1 className="font-display text-6xl md:text-8xl font-semibold leading-none mb-6 opacity-0 animate-fade-up delay-100 text-foreground">
                     Гольцман<br />
                     <span className="text-primary">Никита</span><br />
                     Романович
@@ -220,7 +238,7 @@ export default function Index() {
                   <div className="divider-blue my-8 w-48 opacity-0 animate-fade-in delay-300" />
                   <p className="font-body text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mb-10 opacity-0 animate-fade-up delay-400">
                     Председатель Совета молодых юристов Ямало-Ненецкого автономного округа.
-                    Юрист, помощник депутата. Занимаюсь правозащитной деятельностью в интересах молодёжи и студентов ЯНАО.
+                    Юрист, помощник депутата. Занимаюсь правозащитной деятельностью в интересах молодёжи и студентов.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-up delay-500">
                     <button
@@ -261,8 +279,8 @@ export default function Index() {
                       и молодым людям в возрасте до 35 лет по вопросам трудового, жилищного, образовательного права.
                     </p>
                     <p className="font-body text-muted-foreground leading-relaxed">
-                      Деятельность охватывает весь Ямало-Ненецкий автономный округ. Помогаю разобраться в ситуации,
-                      составить необходимые документы и защитить ваши интересы в государственных органах.
+                      Помогаю разобраться в ситуации, составить необходимые документы и защитить
+                      ваши интересы в государственных органах и судах.
                     </p>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
@@ -270,7 +288,7 @@ export default function Index() {
                       { icon: "Scale", title: "Юридическая помощь", desc: "Консультации по трудовым, жилищным, образовательным вопросам" },
                       { icon: "FileText", title: "Составление документов", desc: "Жалобы, запросы, исковые заявления, претензии" },
                       { icon: "Shield", title: "Защита интересов", desc: "Представление интересов в государственных органах и судах" },
-                      { icon: "Users", title: "Совет молодых юристов", desc: "Руководство профессиональным сообществом молодых юристов ЯНАО" },
+                      { icon: "Users", title: "Совет молодых юристов", desc: "Руководство профессиональным сообществом молодых юристов" },
                     ].map((item) => (
                       <div key={item.title} className="flex gap-4 p-5 border border-border bg-blue-pale/40 rounded-sm card-hover">
                         <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-primary/10 rounded-sm">
@@ -290,9 +308,8 @@ export default function Index() {
             {/* Stats */}
             <section className="py-16 bg-primary">
               <div className="max-w-6xl mx-auto px-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                   {[
-                    { value: "ЯНАО", label: "Регион деятельности" },
                     { value: "до 35", label: "Лет — целевая аудитория" },
                     { value: "0 ₽", label: "Стоимость консультации" },
                     { value: "24/7", label: "Приём обращений онлайн" },
@@ -449,14 +466,14 @@ export default function Index() {
                   Благодарю за обращение. Я свяжусь с вами в течение 3 рабочих дней.
                 </p>
                 <button
-                  onClick={() => { setAppealSent(false); setAppealForm({ lastName: "", firstName: "", middleName: "", birthDate: "", phone: "", email: "", message: "", consent: false }); }}
+                  onClick={() => { setAppealSent(false); setAppealError(""); setAppealForm({ lastName: "", firstName: "", middleName: "", birthDate: "", phone: "", email: "", message: "", consent: false }); }}
                   className="font-body text-sm text-primary hover:opacity-70 transition-opacity"
                 >
                   Подать ещё одно обращение
                 </button>
               </div>
             ) : (
-              <form className="space-y-5 bg-white border border-border p-8 rounded-sm shadow-sm" onSubmit={(e) => { e.preventDefault(); setAppealSent(true); }}>
+              <form className="space-y-5 bg-white border border-border p-8 rounded-sm shadow-sm" onSubmit={handleAppealSubmit}>
                 <div className="grid md:grid-cols-3 gap-4">
                   {[
                     { label: "Фамилия *", key: "lastName", ph: "Иванов", req: true },
@@ -532,12 +549,26 @@ export default function Index() {
                   </span>
                 </label>
 
+                {appealError && (
+                  <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-sm">
+                    <Icon name="AlertCircle" size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+                    <p className="font-body text-xs text-red-600">{appealError}</p>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={!appealForm.consent}
-                  className="w-full py-4 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors rounded-sm shadow-md shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={!appealForm.consent || appealSending}
+                  className="w-full py-4 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors rounded-sm shadow-md shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Отправить обращение
+                  {appealSending ? (
+                    <>
+                      <Icon name="Loader" size={16} className="animate-spin" />
+                      Отправляю...
+                    </>
+                  ) : (
+                    "Отправить обращение"
+                  )}
                 </button>
               </form>
             )}
@@ -560,14 +591,13 @@ export default function Index() {
                 <h2 className="font-display text-2xl font-semibold mb-6 text-foreground">Гольцман Никита Романович</h2>
                 <p className="font-body text-muted-foreground mb-8 leading-relaxed">
                   Уполномоченный по правам молодёжи.<br />
-                  Председатель Совета молодых юристов ЯНАО.<br />
+                  Председатель Совета молодых юристов.<br />
                   Юрист, помощник депутата.
                 </p>
                 <div className="space-y-3">
                   {[
-                    { icon: "MapPin", label: "Регион", value: "Ямало-Ненецкий автономный округ" },
-                    { icon: "Mail", label: "Электронная почта", value: "golcman@молодыеюристыянао.рф" },
-                    { icon: "Clock", label: "Приём обращений", value: "Пн–Пт, 9:00–18:00 (МСК+2)" },
+                    { icon: "Phone", label: "Телефон", value: "+7 (___) ___-__-__" },
+                    { icon: "Mail", label: "Электронная почта", value: "polimick@rambler.ru" },
                   ].map((c) => (
                     <div key={c.label} className="flex gap-4 p-4 border border-border bg-white rounded-sm">
                       <div className="flex-shrink-0 w-9 h-9 bg-primary/10 flex items-center justify-center rounded-sm">
@@ -593,7 +623,7 @@ export default function Index() {
                   Подать обращение
                 </button>
                 <div className="mt-6 pt-6 border-t border-border">
-                  <p className="font-body text-xs text-muted-foreground text-center">Бесплатная юридическая помощь для молодёжи ЯНАО до 35 лет</p>
+                  <p className="font-body text-xs text-muted-foreground text-center">Бесплатная юридическая помощь для молодёжи до 35 лет</p>
                 </div>
               </div>
             </div>
@@ -962,7 +992,7 @@ export default function Index() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <p className="font-display text-lg font-semibold text-primary">Гольцман Никита Романович</p>
-              <p className="font-body text-xs text-muted-foreground mt-1">Уполномоченный по правам молодёжи · ЯНАО</p>
+              <p className="font-body text-xs text-muted-foreground mt-1">Уполномоченный по правам молодёжи</p>
             </div>
             <div className="flex flex-wrap justify-center gap-6">
               {navItems.map((item) => (
@@ -973,7 +1003,7 @@ export default function Index() {
             </div>
           </div>
           <div className="divider-blue mt-8 mb-6" />
-          <p className="font-body text-xs text-muted-foreground text-center">© 2025 Гольцман Н.Р. Бесплатная юридическая помощь молодёжи ЯНАО</p>
+          <p className="font-body text-xs text-muted-foreground text-center">© 2025 Гольцман Н.Р. Уполномоченный по правам молодёжи</p>
         </div>
       </footer>
     </div>

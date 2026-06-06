@@ -62,7 +62,8 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "IBM Plex Sans", sans-serif;
+    font-family:
+      "Liberation Sans", Arial, "Helvetica Neue", Helvetica, sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
@@ -73,7 +74,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Cormorant Garamond", serif;
+    font-family: "Cormorant Garamond", Georgia, serif;
   }
 }
 
@@ -83,7 +84,8 @@
   }
 
   .font-body {
-    font-family: "IBM Plex Sans", sans-serif;
+    font-family:
+      "Liberation Sans", Arial, "Helvetica Neue", Helvetica, sans-serif;
   }
 
   .text-blue {
