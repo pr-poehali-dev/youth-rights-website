@@ -29,7 +29,9 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-				gold: 'hsl(var(--gold))',
+				blue: 'hsl(var(--blue))',
+				'blue-light': 'hsl(var(--blue-light))',
+				'blue-pale': 'hsl(var(--blue-pale))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -84,7 +86,7 @@ export default {
 					to: { height: '0' }
 				},
 				fadeUp: {
-					from: { opacity: '0', transform: 'translateY(20px)' },
+					from: { opacity: '0', transform: 'translateY(24px)' },
 					to: { opacity: '1', transform: 'translateY(0)' }
 				},
 				fadeIn: {
